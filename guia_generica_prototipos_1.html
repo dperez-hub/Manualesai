@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cómo crear prototipos HTML con Claude — Guía para UX Designers</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#fafafa; color:#1a1a1a; font-size:15px; line-height:1.7; }
+
+/* HERO */
+.hero { background:linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color:#fff; padding:80px; }
+.hero-tag { display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:20px; padding:6px 16px; font-size:12px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:28px; color:#aac; }
+.hero h1 { font-size:48px; font-weight:800; margin-bottom:16px; line-height:1.15; }
+.hero h1 span { color:#6ee7f7; }
+.hero p { font-size:18px; color:#aac; max-width:580px; margin-bottom:32px; }
+.hero-pills { display:flex; gap:10px; flex-wrap:wrap; }
+.pill { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:6px 16px; font-size:13px; color:#ccd; }
+
+/* NAV */
+.nav { background:#fff; border-bottom:1px solid #e8e8e8; padding:0 80px; position:sticky; top:0; z-index:100; }
+.nav-inner { display:flex; gap:32px; overflow-x:auto; }
+.nav-link { display:block; padding:16px 0; font-size:13px; font-weight:600; color:#888; border-bottom:2px solid transparent; white-space:nowrap; text-decoration:none; cursor:pointer; }
+.nav-link:hover { color:#333; }
+.nav-link.active { color:#6366f1; border-bottom-color:#6366f1; }
+
+/* CONTENT */
+.content { max-width:860px; margin:0 auto; padding:60px 40px; }
+
+/* SECTION */
+.section { margin-bottom:64px; scroll-margin-top:60px; }
+.section-tag { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#6366f1; margin-bottom:10px; }
+.section h2 { font-size:30px; font-weight:800; color:#111; margin-bottom:10px; }
+.section-desc { font-size:15px; color:#666; margin-bottom:28px; max-width:680px; }
+
+/* DIVIDER */
+.divider { height:1px; background:linear-gradient(to right, #e8e8e8, transparent); margin:64px 0; }
+
+/* WHAT IS IT */
+.tech-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+.tech-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:24px; }
+.tech-icon { font-size:28px; margin-bottom:12px; display:block; }
+.tech-card h3 { font-size:15px; font-weight:700; color:#111; margin-bottom:6px; }
+.tech-card p { font-size:13px; color:#666; line-height:1.6; }
+
+/* WHEN TO USE */
+.when-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+.when-card { border-radius:12px; padding:20px 24px; }
+.when-card.yes { background:#f0fdf4; border:1.5px solid #86efac; }
+.when-card.no { background:#fff5f5; border:1.5px solid #fca5a5; }
+.when-card h3 { font-size:13px; font-weight:700; margin-bottom:10px; }
+.when-card.yes h3 { color:#15803d; }
+.when-card.no h3 { color:#dc2626; }
+.when-card li { font-size:13px; margin-left:16px; margin-bottom:5px; line-height:1.5; }
+.when-card.yes li { color:#14532d; }
+.when-card.no li { color:#7f1d1d; }
+
+/* STEPS */
+.step-list { display:flex; flex-direction:column; gap:0; }
+.step { display:grid; grid-template-columns:56px 1fr; gap:24px; padding:28px 0; border-bottom:1px solid #f0f0f0; }
+.step:last-child { border-bottom:none; }
+.step-bubble { width:48px; height:48px; border-radius:50%; background:#6366f1; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; flex-shrink:0; margin-top:4px; }
+.step h3 { font-size:18px; font-weight:700; color:#111; margin-bottom:6px; }
+.step p { font-size:14px; color:#555; line-height:1.7; margin-bottom:12px; }
+.step .tip { background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; padding:14px 16px; font-size:13px; color:#5b21b6; line-height:1.6; }
+.step .tip strong { display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; color:#7c3aed; }
+
+/* PROMPT EXAMPLES */
+.prompt-box { background:#1e1e2e; border-radius:12px; padding:24px; margin:16px 0; }
+.prompt-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#7c3aed; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.prompt-label::before { content:'💬'; }
+.prompt-text { font-size:13px; color:#cdd6f4; line-height:1.7; font-family:'Courier New', monospace; }
+.prompt-text .highlight { color:#a6e3a1; }
+.prompt-text .placeholder { color:#f38ba8; font-style:italic; }
+
+/* DELIVERABLES */
+.deliverable-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
+.deliverable { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:20px 24px; display:flex; gap:16px; align-items:flex-start; }
+.deliverable-icon { font-size:28px; flex-shrink:0; }
+.deliverable h3 { font-size:14px; font-weight:700; color:#111; margin-bottom:4px; }
+.deliverable p { font-size:12px; color:#666; line-height:1.5; }
+.deliverable .tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-top:6px; }
+.tag-main { background:#ede9fe; color:#6d28d9; }
+.tag-optional { background:#f1f5f9; color:#64748b; }
+
+/* INTERACTION TABLE */
+table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; border:1px solid #e8e8e8; margin-bottom:24px; font-size:13px; }
+th { background:#f8f7ff; padding:12px 16px; text-align:left; font-weight:700; color:#555; border-bottom:2px solid #e8e8e8; }
+td { padding:12px 16px; color:#444; border-bottom:1px solid #f0f0f0; vertical-align:top; line-height:1.5; }
+tr:last-child td { border-bottom:none; }
+td:first-child { font-weight:600; color:#111; }
+.badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.badge-purple { background:#ede9fe; color:#6d28d9; }
+.badge-green { background:#dcfce7; color:#15803d; }
+.badge-yellow { background:#fef9c3; color:#854d0e; }
+.badge-yellow { background:#fef9c3; color:#854d0e; }
+
+/* TIPS BOX */
+.tips-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.tip-card { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:20px 24px; }
+.tip-card.do { border-top:3px solid #22c55e; }
+.tip-card.dont { border-top:3px solid #ef4444; }
+.tip-card h3 { font-size:13px; font-weight:700; margin-bottom:12px; }
+.tip-card.do h3 { color:#15803d; }
+.tip-card.dont h3 { color:#dc2626; }
+.tip-card li { font-size:13px; margin-left:16px; margin-bottom:6px; color:#555; line-height:1.5; }
+
+/* FLOW DIAGRAM */
+.flow { display:flex; align-items:center; gap:0; overflow-x:auto; padding:8px 0; margin-bottom:28px; }
+.flow-step { background:#fff; border:1.5px solid #e0e7ff; border-radius:10px; padding:14px 20px; text-align:center; flex-shrink:0; min-width:130px; }
+.flow-step .fs-num { font-size:11px; font-weight:700; color:#6366f1; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.flow-step .fs-name { font-size:13px; font-weight:700; color:#111; }
+.flow-arrow { color:#c7d2fe; font-size:20px; padding:0 8px; flex-shrink:0; }
+
+/* TIME TABLE */
+.time-table { background:#fff; border:1px solid #e8e8e8; border-radius:12px; overflow:hidden; margin-bottom:24px; }
+.time-row { display:grid; grid-template-columns:2fr 1fr 1fr; border-bottom:1px solid #f0f0f0; }
+.time-row:last-child { border-bottom:none; }
+.time-row.header { background:#f8f7ff; }
+.time-cell { padding:12px 16px; font-size:13px; }
+.time-row.header .time-cell { font-weight:700; color:#555; font-size:12px; }
+
+/* FOOTER */
+.footer { background:#111; color:#666; text-align:center; padding:40px; font-size:13px; margin-top:80px; }
+.footer strong { color:#fff; }
+
+/* CALLOUT */
+.callout { background:#f5f3ff; border:1.5px solid #ddd6fe; border-radius:12px; padding:20px 24px; margin-bottom:24px; display:flex; gap:16px; align-items:flex-start; }
+.callout-icon { font-size:24px; flex-shrink:0; }
+.callout p { font-size:14px; color:#5b21b6; line-height:1.6; }
+.callout strong { color:#4c1d95; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">📋 Guía práctica para UX Designers</div>
+  <h1>Cómo crear prototipos<br><span>HTML interactivos</span><br>con Claude</h1>
+  <p>Una guía paso a paso para diseñar, construir y compartir propuestas UX navegables sin saber programar.</p>
+  <div class="hero-pills">
+    <div class="pill">Sin instalar nada</div>
+    <div class="pill">Un solo archivo</div>
+    <div class="pill">Navegable en el browser</div>
+    <div class="pill">Compartible con el cliente</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-inner">
+    <a class="nav-link active" href="#que-es">¿Qué es?</a>
+    <a class="nav-link" href="#cuando">¿Cuándo usarlo?</a>
+    <a class="nav-link" href="#antes">Antes de empezar</a>
+    <a class="nav-link" href="#proceso">Proceso paso a paso</a>
+    <a class="nav-link" href="#entregables">Entregables</a>
+    <a class="nav-link" href="#interactividad">Interactividad posible</a>
+    <a class="nav-link" href="#ajustes">Cómo pedir ajustes</a>
+    <a class="nav-link" href="#buenas-practicas">Buenas prácticas</a>
+    <a class="nav-link" href="#compartir">Compartir</a>
+    <a class="nav-link" href="#tiempos">Tiempos</a>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- QUE ES -->
+  <div class="section" id="que-es">
+    <div class="section-tag">01 · Qué es</div>
+    <h2>¿Qué es un prototipo HTML?</h2>
+    <p class="section-desc">Un prototipo HTML es una propuesta UX navegable — el cliente puede hacer click, completar formularios y sentir el flujo real. No es una imagen estática ni un video, es una mini aplicación que vive en un solo archivo.</p>
+
+    <div class="tech-grid">
+      <div class="tech-card">
+        <span class="tech-icon">🏗</span>
+        <h3>HTML — Estructura</h3>
+        <p>Define qué elementos existen: botones, formularios, tablas, paneles, navegación lateral.</p>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">🎨</span>
+        <h3>CSS — Visual</h3>
+        <p>Define cómo se ven: colores de marca, tipografía, espaciados, bordes, estados activo/inactivo.</p>
+      </div>
+      <div class="tech-card">
+        <span class="tech-icon">⚡</span>
+        <h3>JavaScript — Interactividad</h3>
+        <p>Define cómo se comporta: clicks, navegación entre pasos, búsqueda, totales dinámicos.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">💡</div>
+      <p><strong>La clave:</strong> todo vive en un solo archivo <code>.html</code>. Se abre en cualquier browser, sin instalar nada, sin servidor. Puedes enviarlo por email, subirlo a GitHub o abrirlo desde el escritorio.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- CUANDO USARLO -->
+  <div class="section" id="cuando">
+    <div class="section-tag">02 · Cuándo usarlo</div>
+    <h2>¿Cuándo usar un prototipo HTML?</h2>
+    <p class="section-desc">No siempre es la herramienta correcta. Úsalo cuando necesites mostrar interacción real, no solo diseño visual.</p>
+
+    <div class="when-grid">
+      <div class="when-card yes">
+        <h3>✅ Ideal para esto</h3>
+        <ul>
+          <li>Flujos multi-paso con navegación entre pantallas</li>
+          <li>Formularios con validación y lógica condicional</li>
+          <li>Propuestas donde el cliente necesita "sentir" el flujo</li>
+          <li>Demos con datos reales del sistema legacy</li>
+          <li>Cuando Figma es muy estático para explicar la UX</li>
+          <li>Presentaciones donde el cliente interactúa en vivo</li>
+          <li>Comparativos before/after (sistema actual vs propuesta)</li>
+        </ul>
+      </div>
+      <div class="when-card no">
+        <h3>❌ No es ideal para esto</h3>
+        <ul>
+          <li>Diseño de componentes aislados (mejor Figma)</li>
+          <li>Pantallas con animaciones complejas</li>
+          <li>Prototipos que necesitan datos en tiempo real de una API</li>
+          <li>Cuando el cliente solo necesita ver imágenes estáticas</li>
+          <li>Flujos con decenas de pantallas diferentes</li>
+          <li>Cuando el equipo ya tiene Figma con interactividad</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ANTES DE EMPEZAR -->
+  <div class="section" id="antes">
+    <div class="section-tag">03 · Preparación</div>
+    <h2>Antes de empezar</h2>
+    <p class="section-desc">Reúne estos elementos antes de abrir Claude. Cuanto mejor sea el contexto que le das, mejor será el resultado.</p>
+
+    <table>
+      <thead><tr><th>Elemento</th><th>Para qué sirve</th><th>Prioridad</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>📋 Brief o documento del flujo</td>
+          <td>Define los pasos, acciones y datos del sistema. Puede ser un PDF, doc o descripción escrita.</td>
+          <td><span class="badge badge-purple">Esencial</span></td>
+        </tr>
+        <tr>
+          <td>🖼 Screenshots del sistema actual</td>
+          <td>Claude entiende los pain points y puede mostrar el contraste before/after.</td>
+          <td><span class="badge badge-purple">Esencial</span></td>
+        </tr>
+        <tr>
+          <td>🎨 Screenshots del design system nuevo</td>
+          <td>Claude replica colores, tipografía y componentes del sistema destino (ej: Mars 2.0).</td>
+          <td><span class="badge badge-purple">Esencial</span></td>
+        </tr>
+        <tr>
+          <td>📊 Datos reales de ejemplo</td>
+          <td>Nombres de clientes, números de orden, productos — hacen el prototipo más creíble.</td>
+          <td><span class="badge badge-green">Recomendado</span></td>
+        </tr>
+        <tr>
+          <td>🎯 Lista de lo que debe ser interactivo</td>
+          <td>Define qué botones deben funcionar, qué busquedas deben mostrar resultados, etc.</td>
+          <td><span class="badge badge-green">Recomendado</span></td>
+        </tr>
+        <tr>
+          <td>🖌 Logo de la marca</td>
+          <td>Se puede embeber directamente en el HTML para que el header se vea real.</td>
+          <td><span class="badge badge-yellow">Opcional</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PROCESO -->
+  <div class="section" id="proceso">
+    <div class="section-tag">04 · Proceso</div>
+    <h2>Proceso paso a paso</h2>
+    <p class="section-desc">Sigue esta secuencia. No saltes pasos — es tentador ir directo al prototipo completo, pero construir y validar de a un paso a la vez ahorra mucho tiempo.</p>
+
+    <div class="step-list">
+
+      <div class="step">
+        <div class="step-bubble">1</div>
+        <div>
+          <h3>Define el flujo completo</h3>
+          <p>Antes de que Claude escriba una sola línea de código, define cuántos pasos tiene el flujo, cómo se llama cada uno y qué hace el usuario. Si tienes un brief o documento, compártelo directamente.</p>
+          <div class="prompt-box">
+            <div class="prompt-label">Prompt de ejemplo</div>
+            <div class="prompt-text">
+"Quiero crear un prototipo HTML para el flujo de <span class="placeholder">[nombre del flujo]</span>.
+Tiene <span class="placeholder">[N]</span> pasos:
+<span class="highlight">Paso 1:</span> <span class="placeholder">[nombre]</span> — <span class="placeholder">[qué hace el usuario]</span>
+<span class="highlight">Paso 2:</span> <span class="placeholder">[nombre]</span> — <span class="placeholder">[qué hace el usuario]</span>
+<span class="highlight">Paso 3:</span> <span class="placeholder">[nombre]</span> — <span class="placeholder">[qué hace el usuario]</span>
+
+Te adjunto el documento de referencia y screenshots del sistema actual."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">2</div>
+        <div>
+          <h3>Comparte el design system</h3>
+          <p>Adjunta screenshots del sistema nuevo (si existe) o del sistema actual para que Claude entienda el look & feel que debe replicar. Cuantas más pantallas compartas, mejor entiende Claude los colores, tipografía, componentes y espaciados.</p>
+          <div class="prompt-box">
+            <div class="prompt-label">Prompt de ejemplo</div>
+            <div class="prompt-text">
+"Aquí van los screenshots del design system. El sistema se llama <span class="placeholder">[nombre]</span>.
+Los colores principales son <span class="placeholder">[color primario]</span> y <span class="placeholder">[color secundario]</span>.
+Quiero que el prototipo replique este estilo exactamente:
+- Header: <span class="placeholder">[descripción]</span>
+- Sidenav lateral con los pasos del flujo
+- Botones: <span class="placeholder">[descripción]</span>"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">3</div>
+        <div>
+          <h3>Construye el Paso 1 y valídalo</h3>
+          <p>Pide que Claude construya solo el primer paso. Abre el archivo en Chrome, revísalo visualmente y pide todos los ajustes que necesites antes de continuar. Es mucho más fácil ajustar una pantalla que cuatro.</p>
+          <div class="tip">
+            <strong>💡 Tip de validación</strong>
+            Cuando abras el archivo, revisa: ¿Se ven bien los espaciados? ¿Los colores son correctos? ¿Los botones tienen el tamaño adecuado? ¿El texto es legible? Pide ajustes específicos con capturas de pantalla como referencia.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">4</div>
+        <div>
+          <h3>Construye el resto de pasos uno a uno</h3>
+          <p>Una vez validado el Paso 1, construye el Paso 2, valídalo, luego el Paso 3, y así. Cada paso hereda el design system del anterior, por lo que los ajustes globales (colores, tipografía) se aplican a todo.</p>
+          <div class="prompt-box">
+            <div class="prompt-label">Prompt de ejemplo</div>
+            <div class="prompt-text">
+"El paso 1 se ve bien. Ahora construye el <span class="highlight">Paso 2 — <span class="placeholder">[nombre]</span></span>.
+Debe incluir:
+- <span class="placeholder">[elemento 1]</span>
+- <span class="placeholder">[elemento 2]</span>
+- <span class="placeholder">[elemento 3]</span>
+Cuando el usuario hace <span class="placeholder">[acción]</span>, debe pasar <span class="placeholder">[resultado]</span>."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">5</div>
+        <div>
+          <h3>Integra todo en un solo archivo</h3>
+          <p>Una vez listos todos los pasos, pide la integración en un único HTML. Este paso es crítico — evita problemas de navegación entre archivos separados y garantiza que el CSS sea consistente en todas las pantallas.</p>
+          <div class="prompt-box">
+            <div class="prompt-label">Prompt de ejemplo</div>
+            <div class="prompt-text">
+"Integra todos los <span class="placeholder">[N]</span> pasos en un solo archivo HTML.
+La navegación entre pasos debe funcionar con los botones de cada pantalla.
+El sidenav debe mostrar el estado de cada paso: activo (color primario), completado (checkmark), pendiente (gris).
+No debe haber recarga de página al navegar."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">6</div>
+        <div>
+          <h3>Agrega interactividad avanzada</h3>
+          <p>Con el flujo básico funcionando, agrega los comportamientos interactivos que hacen el prototipo más realista: búsquedas, filtros, totales dinámicos, modals de confirmación, selección de opciones.</p>
+          <div class="tip">
+            <strong>💡 Prioriza la interactividad que el cliente verá</strong>
+            No necesitas que todo funcione. Enfócate en los momentos clave que quieres mostrar en la demo: el search, el formulario principal, la confirmación final.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-bubble">7</div>
+        <div>
+          <h3>Publica y comparte</h3>
+          <p>Sube el archivo a GitHub Pages para obtener un link público que el cliente puede abrir en cualquier browser sin descargar nada. También puedes tomar screenshots de cada estado para Figma o presentaciones.</p>
+          <div class="prompt-box">
+            <div class="prompt-label">Si no sabes cómo subir a GitHub Pages</div>
+            <div class="prompt-text">
+"¿Cómo subo este prototipo a GitHub Pages para compartirlo con mi cliente? 
+Tengo cuenta en GitHub pero nunca lo he hecho antes."
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ENTREGABLES -->
+  <div class="section" id="entregables">
+    <div class="section-tag">05 · Entregables</div>
+    <h2>Qué obtienes al final</h2>
+    <p class="section-desc">Al completar el proceso tendrás estos archivos listos para presentar o compartir.</p>
+
+    <div class="deliverable-grid">
+      <div class="deliverable">
+        <div class="deliverable-icon">🏗</div>
+        <div>
+          <h3>HTML — Estructura</h3>
+          <p>El esqueleto de la interfaz: pantallas, formularios, tablas, botones, modals, navegación lateral. Todo lo que el usuario ve y toca.</p>
+          <span class="tag tag-main">Siempre incluido</span>
+        </div>
+      </div>
+      <div class="deliverable">
+        <div class="deliverable-icon">🎨</div>
+        <div>
+          <h3>CSS — Estilos</h3>
+          <p>El diseño visual: colores de marca, tipografía, espaciados, bordes, sombras, estados activo/inactivo. Claude puede replicar cualquier design system a partir de screenshots.</p>
+          <span class="tag tag-main">Siempre incluido</span>
+        </div>
+      </div>
+      <div class="deliverable">
+        <div class="deliverable-icon">⚡</div>
+        <div>
+          <h3>JavaScript — Interactividad</h3>
+          <p>El comportamiento: navegación entre pasos, búsquedas, filtros, cálculos dinámicos, modals, validaciones. Sin frameworks externos — todo vanilla JS en el mismo archivo.</p>
+          <span class="tag tag-main">Siempre incluido</span>
+        </div>
+      </div>
+      <div class="deliverable">
+        <div class="deliverable-icon">🖼</div>
+        <div>
+          <h3>Frames en Figma</h3>
+          <p>Claude puede crear frames en tu archivo de Figma con los pantallazos del prototipo organizados por sección. No queda 100% pixel-perfect pero sirve como referencia visual para el equipo.</p>
+          <span class="tag tag-optional">Opcional</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- INTERACTIVIDAD -->
+  <div class="section" id="interactividad">
+    <div class="section-tag">06 · Interactividad</div>
+    <h2>Qué puede hacer el prototipo</h2>
+    <p class="section-desc">Esto es lo que se puede lograr con HTML + JavaScript sin frameworks ni librerías externas.</p>
+
+    <table>
+      <thead><tr><th>Funcionalidad</th><th>Descripción</th><th>Dificultad</th></tr></thead>
+      <tbody>
+        <tr><td>Navegación entre pasos</td><td>Flujos multi-paso con sidenav que muestra estado activo, completado y pendiente en cada pantalla</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Tabs y acordeones</td><td>Navegación por pestañas o secciones colapsables que muestran/ocultan contenido</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Selección de tarjetas</td><td>Opciones tipo card con estado activo visual al hacer click, con radio button o checkbox integrado</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Dropdowns y selects</td><td>Menús desplegables con opciones dinámicas que cambian otros elementos de la pantalla</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Tablas de resultados</td><td>Simulación de búsqueda que muestra tabla de resultados con datos de ejemplo al hacer click</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Modals y popups</td><td>Ventanas de confirmación, alertas o formularios que aparecen sobre la pantalla</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Toasts / notificaciones</td><td>Mensajes de éxito, error o info que aparecen y desaparecen automáticamente</td><td><span class="badge badge-green">Fácil</span></td></tr>
+        <tr><td>Búsqueda en tiempo real</td><td>Filtrado de listas o tablas mientras el usuario escribe, sin recargar la página</td><td><span class="badge badge-purple">Medio</span></td></tr>
+        <tr><td>Carrito o lista dinámica</td><td>Agregar/quitar items con actualización automática de cantidades y totales</td><td><span class="badge badge-purple">Medio</span></td></tr>
+        <tr><td>Formularios condicionales</td><td>Campos o secciones que aparecen u ocultan según lo que el usuario selecciona</td><td><span class="badge badge-purple">Medio</span></td></tr>
+        <tr><td>Validación inline</td><td>Campos con feedback visual (verde/rojo) al completar o dejar vacío</td><td><span class="badge badge-purple">Medio</span></td></tr>
+        <tr><td>Gráficos y visualizaciones</td><td>Charts de barras, líneas o torta con datos de ejemplo usando librerías como Chart.js</td><td><span class="badge badge-purple">Medio</span></td></tr>
+        <tr><td>Drag & drop</td><td>Elementos que se pueden reordenar arrastrando, como listas de prioridades o kanban</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+        <tr><td>Calculadoras y simuladores</td><td>Herramientas que calculan precios, descuentos, fechas u otros valores en tiempo real</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+        <tr><td>Dark mode / temas</td><td>Toggle que cambia el esquema de colores de toda la interfaz instantáneamente</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+        <tr><td>Exportar a PDF o CSV</td><td>Botón que genera y descarga un archivo con los datos del prototipo</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+        <tr><td>Animaciones y transiciones</td><td>Efectos de entrada/salida, loading states, skeleton screens y micro-interacciones</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+        <tr><td>Integración con IA (Claude API)</td><td>Prototipo que llama a Claude en tiempo real para generar contenido, resumir texto o responder preguntas</td><td><span class="badge badge-yellow">Avanzado</span></td></tr>
+      </tbody>
+    </table>
+    <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:16px 20px;margin-top:8px;font-size:13px;color:#5b21b6;line-height:1.6;">
+      <strong>Sobre Figma:</strong> Claude puede generar frames en Figma directamente desde el prototipo HTML — creando la estructura visual organizada por secciones en tu archivo de equipo. Es útil como referencia para el equipo de desarrollo, aunque el resultado no siempre queda 100% pixel-perfect y puede requerir ajustes manuales de espaciado o posicionamiento.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- COMO PEDIR AJUSTES -->
+  <div class="section" id="ajustes">
+    <div class="section-tag">07 · Ajustes</div>
+    <h2>Cómo pedir ajustes a Claude</h2>
+    <p class="section-desc">La clave es ser específico. Claude no puede ver tu pantalla — descríbele exactamente qué está mal y adjunta screenshots cuando sea posible.</p>
+
+    <table>
+      <thead><tr><th>Tipo de ajuste</th><th>Cómo pedirlo</th></tr></thead>
+      <tbody>
+        <tr><td>Espaciado / márgenes</td><td>"El margen izquierdo del menú debe ser 48px, igual que el contenido del lado derecho"</td></tr>
+        <tr><td>Colores</td><td>"El botón Confirmar debe ser rojo (#e31837), no verde. El texto de los pasos inactivos en gris (#aaa)"</td></tr>
+        <tr><td>Tamaño de elementos</td><td>"Agranda el sidebar de resumen — actualmente tiene 224px, ponlo en 320px"</td></tr>
+        <tr><td>Texto / labels</td><td>"Renombra 'Items' a 'Create Order' en el sidenav, en el título de la página y en el bottom bar"</td></tr>
+        <tr><td>Estructura / layout</td><td>"Mueve los botones Cancel/Back/Next al lado derecho del título, no en la barra inferior"</td></tr>
+        <tr><td>Funcionalidad nueva</td><td>"Al hacer click en Search Order debe aparecer una animación de 'Searching...' por 0.8 segundos antes de mostrar los resultados"</td></tr>
+        <tr><td>Algo que no funciona</td><td>"El ícono del sidenav no cambia a blanco cuando el paso está activo. El problema es que el SVG usa stroke heredado"</td></tr>
+        <tr><td>Replicar algo visual</td><td>"Quiero que se vea exactamente como en este screenshot que te adjunto" [+ imagen]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BUENAS PRACTICAS -->
+  <div class="section" id="buenas-practicas">
+    <div class="section-tag">08 · Buenas prácticas</div>
+    <h2>Buenas prácticas</h2>
+
+    <div class="tips-grid">
+      <div class="tip-card do">
+        <h3>✅ Haz esto</h3>
+        <ul>
+          <li>Valida cada paso visualmente antes de pasar al siguiente</li>
+          <li>Adjunta imágenes cuando quieras replicar algo</li>
+          <li>Pide un solo ajuste a la vez — no en lista</li>
+          <li>Trabaja en un solo archivo desde temprano</li>
+          <li>Comparte el contexto del proyecto al inicio</li>
+          <li>Usa datos realistas en el prototipo</li>
+          <li>Guarda copias antes de cambios grandes</li>
+          <li>Toma screenshots de cada estado interactivo</li>
+          <li>Si cambias de conversación, sube el archivo .html al inicio</li>
+        </ul>
+      </div>
+      <div class="tip-card dont">
+        <h3>❌ Evita esto</h3>
+        <ul>
+          <li>Pedir 10 cambios a la vez en un solo mensaje</li>
+          <li>Trabajar con archivos separados por paso</li>
+          <li>Hacer ediciones manuales en el HTML sin avisar</li>
+          <li>Asumir que Claude recuerda conversaciones anteriores</li>
+          <li>Usar Google Drive para compartir (no renderiza HTML)</li>
+          <li>Esperar que Figma vía código quede pixel-perfect</li>
+          <li>Agregar interactividad compleja antes de validar el diseño base</li>
+          <li>Saltarte la validación visual entre pasos</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- COMPARTIR -->
+  <div class="section" id="compartir">
+    <div class="section-tag">09 · Publicación</div>
+    <h2>Cómo compartir el prototipo</h2>
+
+    <table>
+      <thead><tr><th>Método</th><th>Ventajas</th><th>Desventajas</th><th>Recomendado para</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>GitHub Pages</td>
+          <td>Gratis, link permanente, fácil de actualizar</td>
+          <td>Requiere cuenta de GitHub</td>
+          <td><span class="badge badge-purple">Presentaciones a cliente</span></td>
+        </tr>
+        <tr>
+          <td>Netlify Drop</td>
+          <td>Sin cuenta, link en 30 segundos</td>
+          <td>Link temporal (expira)</td>
+          <td><span class="badge badge-green">Revisiones rápidas</span></td>
+        </tr>
+        <tr>
+          <td>Archivo local</td>
+          <td>Sin dependencias externas</td>
+          <td>No se puede compartir por link</td>
+          <td><span class="badge badge-yellow">Uso personal / demo en vivo</span></td>
+        </tr>
+        <tr>
+          <td>CodePen / JSFiddle</td>
+          <td>Link compartible, no requiere cuenta</td>
+          <td>Límite de tamaño, pega el código</td>
+          <td><span class="badge badge-yellow">Prototipos pequeños</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-icon">🚀</div>
+      <p><strong>GitHub Pages — paso a paso:</strong> Crea un repositorio en github.com → sube el archivo como <code>index.html</code> → ve a Settings → Pages → selecciona Branch: main → Save. En 1-2 minutos tendrás un link tipo <code>https://tuusuario.github.io/nombre-repo</code></p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TIEMPOS -->
+  <div class="section" id="tiempos">
+    <div class="section-tag">10 · Tiempos</div>
+    <h2>Tiempos estimados</h2>
+    <p class="section-desc">Estos son tiempos aproximados asumiendo que tienes el brief y los screenshots listos antes de empezar.</p>
+
+    <div class="time-table">
+      <div class="time-row header">
+        <div class="time-cell">Tipo de prototipo</div>
+        <div class="time-cell">Pasos</div>
+        <div class="time-cell">Tiempo estimado</div>
+      </div>
+      <div class="time-row">
+        <div class="time-cell">Solo estructura visual — sin interactividad</div>
+        <div class="time-cell">3–4 pasos</div>
+        <div class="time-cell">1–2 horas</div>
+      </div>
+      <div class="time-row">
+        <div class="time-cell">Con interactividad básica — tabs, navegación, búsqueda simple</div>
+        <div class="time-cell">3–4 pasos</div>
+        <div class="time-cell">2–3 horas</div>
+      </div>
+      <div class="time-row">
+        <div class="time-cell">Complejo — carrito dinámico, totales, modals, filtros</div>
+        <div class="time-cell">4+ pasos</div>
+        <div class="time-cell">3–5 horas</div>
+      </div>
+      <div class="time-row">
+        <div class="time-cell">Guía de alertas y patrones de mensajes</div>
+        <div class="time-cell">—</div>
+        <div class="time-cell">30–60 min</div>
+      </div>
+      <div class="time-row">
+        <div class="time-cell">Publicación en GitHub Pages</div>
+        <div class="time-cell">—</div>
+        <div class="time-cell">10–15 min</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-icon">⏱</div>
+      <p><strong>El mayor ahorro de tiempo:</strong> tener el brief, los screenshots del design system y los datos de ejemplo listos antes de empezar. Improvisar el contenido durante la construcción duplica el tiempo.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>Guía de Prototipos HTML con Claude</strong><br>
+  Documento genérico para UX Designers · 2026<br><br>
+  <span style="color:#444;">Creado con Claude · HTML + CSS + JavaScript vanilla</span>
+</div>
+
+<script>
+// Nav active on scroll
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.nav-link');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+});
+
+navLinks.forEach(l => {
+  l.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(l.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+</body>
+</html>

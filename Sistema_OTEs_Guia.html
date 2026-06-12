@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Propuestas Técnicas – Área Experiencia</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: #F7F8FA; color: #1A1A2E; }
+
+/* ── Header ── */
+.header { background: #12122A; color: white; padding: 24px 48px; border-bottom: 3px solid #2D287E; }
+.header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.header p { font-size: 12px; opacity: 0.55; margin-top: 4px; font-weight: 400; }
+
+/* ── Legend ── */
+.legend { display: flex; gap: 20px; align-items: center; padding: 10px 48px; background: white; border-bottom: 1px solid #EBEBEB; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #555; font-weight: 500; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.leg-hint { margin-left: auto; font-size: 10px; color: #AAA; font-style: italic; }
+
+/* ── Phase bar ── */
+.phases { display: flex; padding: 14px 48px 0; background: #F7F8FA; }
+.ph { flex: 1; text-align: center; font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding-bottom: 8px; border-bottom: 3px solid; }
+.ph1 { flex: 4; border-color: #2D287E; color: #2D287E; }
+.ph2 { flex: 2; border-color: #7418F0; color: #7418F0; }
+.ph3 { flex: 2; border-color: #E8830A; color: #E8830A; }
+.ph4 { flex: 2; border-color: #1A8C52; color: #1A8C52; }
+
+/* ── Input banner ── */
+.input-banner { margin: 12px 48px 0; background: white; border: 1.5px solid #DDE4FF; border-left: 5px solid #2D287E; border-radius: 8px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; }
+.input-banner-icon { font-size: 20px; }
+.input-banner-label { font-size: 10px; font-weight: 700; color: #2D287E; margin-bottom: 3px; }
+.input-banner-items { display: flex; gap: 14px; flex-wrap: wrap; font-size: 10px; color: #444; }
+
+/* ── Flow row ── */
+.flow-wrap { padding: 14px 48px 0; overflow-x: auto; }
+.flow-row { display: flex; align-items: flex-start; gap: 0; min-width: max-content; }
+
+/* Chevron connector */
+.chev-wrap { display: flex; align-items: center; padding-top: 36px; flex-shrink: 0; width: 32px; }
+.chev-wrap svg { width: 32px; height: 22px; }
+
+/* ── Cards ── */
+.card {
+  width: 158px; flex-shrink: 0;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #EAEEF2;
+  cursor: pointer;
+  transition: all 0.18s;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.card.active-gpt { border-color: #C8D0F0; }
+.card.claude-card { border-color: #DDD0F8; }
+.card.next-card { border-color: #EAEEF2; background: #FAFAFA; opacity: 0.72; }
+.card.end-card { border-color: #B8E8CE; }
+.card.selected { transform: translateY(-3px); box-shadow: 0 0 0 2px rgba(45,40,126,0.15), 0 6px 18px rgba(0,0,0,0.08); }
+.card.claude-card.selected { box-shadow: 0 0 0 2px rgba(116,24,240,0.15), 0 6px 18px rgba(0,0,0,0.08); }
+.card.end-card.selected { box-shadow: 0 0 0 2px rgba(26,140,82,0.15), 0 6px 18px rgba(0,0,0,0.08); }
+
+.card-body { padding: 12px 12px 10px; }
+.card-num { width: 22px; height: 22px; border-radius: 50%; color: white; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.card-icon { font-size: 22px; text-align: center; margin-bottom: 6px; }
+.card-title-text { font-size: 11px; font-weight: 700; color: #12122A; line-height: 1.35; text-align: center; }
+.card-where { font-size: 9px; color: #AAA; text-align: center; margin-top: 3px; font-weight: 500; }
+.card-badge { font-size: 8px; padding: 2px 7px; border-radius: 20px; display: block; text-align: center; margin: 6px auto 0; width: fit-content; font-weight: 600; }
+.badge-active { background: #EEF0FF; color: #2D287E; }
+.badge-claude { background: #F2E8FF; color: #7418F0; }
+.badge-next { background: #F0F0F0; color: #888; }
+.badge-end { background: #D6F5E5; color: #1A6B3A; }
+.card-drive-tag { background: #EEF0FF; border-top: 1px solid #DDE4FF; padding: 4px 10px; font-size: 7.5px; color: #2D287E; font-weight: 600; text-align: center; }
+.card-drive-tag.v { background: #F0E8FF; border-top-color: #DDD0FF; color: #7418F0; }
+
+/* ── Transfer row ── */
+.transfer-row { display: flex; padding: 8px 48px 0; gap: 0; overflow-x: auto; min-width: max-content; }
+.t-space { width: 158px; flex-shrink: 0; }
+.t-arrow-w { width: 32px; flex-shrink: 0; }
+.t-pill-w { width: 158px; flex-shrink: 0; }
+.t-pill { border: 1.5px dashed #E8A020; border-radius: 6px; padding: 5px 7px; font-size: 8.5px; color: #555; line-height: 1.4; background: #FFFCF0; }
+.t-pill.key { background: #F5EEFF; border-color: #7418F0; }
+.t-label { font-size: 7.5px; font-weight: 700; color: #E8A020; display: block; margin-bottom: 2px; }
+.t-label.key { color: #7418F0; }
+
+/* ── QA row ── */
+.qa-row { display: flex; padding: 7px 48px 16px; gap: 0; overflow-x: auto; min-width: max-content; }
+.qa-sp { width: 158px; flex-shrink: 0; }
+.qa-aw { width: 32px; flex-shrink: 0; }
+.qa-box { width: 158px; flex-shrink: 0; border-radius: 7px; padding: 6px 9px; border: 1px solid; }
+.qa-box.active-qa { background: #FFFBF0; border-color: #E8A020; }
+.qa-box.inactive-qa { background: #F7F7F7; border-color: #E0E0E0; }
+.qa-box.violet-qa { background: #F5EEFF; border-color: #7418F0; }
+.qa-box.green-qa { background: #EDFBF4; border-color: #1A8C52; }
+.qa-title { font-size: 7.5px; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
+.qa-title.a { color: #E8A020; }
+.qa-title.i { color: #CCC; }
+.qa-title.v { color: #7418F0; }
+.qa-title.g { color: #1A8C52; }
+.qa-item { font-size: 8.5px; color: #444; margin-bottom: 1px; display: flex; gap: 3px; }
+.qa-item.i { color: #CCC; }
+
+/* ── Tabs ── */
+.tabs-nav { display: flex; gap: 0; padding: 0 48px; background: white; border-bottom: 2px solid #EAEEF2; margin-top: 0; }
+.tab-btn { padding: 12px 20px; font-size: 12px; font-weight: 600; color: #888; border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+.tab-btn:hover { color: #2D287E; }
+.tab-btn.active { color: #2D287E; border-bottom-color: #2D287E; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Detail panel ── */
+.detail-wrap { padding: 0 48px; }
+.detail-panel { background: white; border-radius: 12px; border: 1px solid #E8EBF0; overflow: hidden; display: none; margin-top: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.detail-panel.visible { display: block; }
+.dp-header { padding: 14px 20px; color: white; display: flex; justify-content: space-between; align-items: flex-start; }
+.dp-header.blue { background: #2D287E; }
+.dp-header.violet { background: #7418F0; }
+.dp-header.orange { background: #E8830A; }
+.dp-header.gray { background: #666; }
+.dp-header.green { background: #1A8C52; }
+.dp-title { font-size: 15px; font-weight: 700; }
+.dp-sub { font-size: 10px; opacity: 0.75; margin-top: 2px; }
+.close-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 10px; white-space: nowrap; margin-left: 14px; font-weight: 600; }
+.dp-body { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.dp-col { padding: 16px 18px; border-right: 1px solid #F2F2F2; }
+.dp-col:last-child { border-right: none; }
+.dp-col h3 { font-size: 8.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #BBB; margin-bottom: 10px; }
+.dp-item { display: flex; gap: 6px; margin-bottom: 7px; align-items: flex-start; }
+.dp-dot { width: 5px; height: 5px; border-radius: 50%; background: #2D287E; flex-shrink: 0; margin-top: 5px; }
+.dp-dot.v { background: #7418F0; }
+.dp-dot.o { background: #E8830A; }
+.dp-dot.g { background: #1A8C52; }
+.dp-text { font-size: 11px; color: #333; line-height: 1.55; }
+.how-box { background: #F7F8FA; border-radius: 8px; padding: 10px 12px; }
+.how-step { font-size: 11px; color: #333; margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+.how-n { width: 18px; height: 18px; border-radius: 50%; background: #2D287E; color: white; font-size: 8.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.how-n.v { background: #7418F0; }
+
+/* ── Drive section ── */
+.drive-section { margin: 14px 48px 0; background: white; border-radius: 12px; border: 1px solid #E8EBF0; padding: 18px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.drive-section h2 { font-size: 13px; font-weight: 700; color: #12122A; margin-bottom: 3px; }
+.drive-section p { font-size: 10px; color: #888; margin-bottom: 12px; }
+.drive-folder { background: #EEF1FF; border: 1.5px solid #2D287E; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; }
+.drive-folder-title { font-size: 10px; font-weight: 700; color: #2D287E; margin-bottom: 8px; }
+.drive-files { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.drive-file { background: white; border-radius: 8px; padding: 10px 11px; border: 1px solid #DDE4FF; }
+.df-icon { font-size: 18px; margin-bottom: 3px; }
+.df-name { font-size: 9.5px; font-weight: 700; color: #2D287E; margin-bottom: 2px; }
+.df-desc { font-size: 9px; color: #666; line-height: 1.35; }
+.df-tag { font-size: 8px; font-weight: 700; margin-top: 5px; }
+.setup-box { background: #F7F8FA; border-radius: 8px; padding: 11px 14px; }
+.setup-title { font-size: 11px; font-weight: 700; color: #12122A; margin-bottom: 8px; }
+.setup-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.ss { display: flex; gap: 8px; align-items: flex-start; }
+.ss-n { width: 20px; height: 20px; border-radius: 50%; color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ss-text { font-size: 10.5px; color: #333; line-height: 1.4; }
+
+/* ── Orchestrator ── */
+.orch { margin: 12px 48px 36px; background: #12122A; color: white; border-radius: 12px; padding: 18px 22px; }
+.orch h2 { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.orch-sub { font-size: 10px; opacity: 0.55; margin-bottom: 12px; }
+.orch-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 18px; }
+.orch-col h4 { font-size: 8px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.45; margin-bottom: 7px; }
+.orch-item { font-size: 10.5px; opacity: 0.8; margin-bottom: 5px; display: flex; gap: 6px; align-items: flex-start; }
+.orch-dot { width: 4px; height: 4px; border-radius: 50%; background: #7418F0; flex-shrink: 0; margin-top: 4px; }
+.orch-flow { display: flex; gap: 3px; flex-wrap: wrap; align-items: center; }
+.orch-step { background: rgba(255,255,255,0.08); border-radius: 5px; padding: 5px 8px; font-size: 10px; }
+.orch-arr { opacity: 0.3; font-size: 11px; }
+.badge-soon { background: rgba(232,131,10,0.18); color: #E8830A; border: 1px solid rgba(232,131,10,0.3); border-radius: 20px; padding: 1px 7px; font-size: 8.5px; font-weight: 700; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧩 Sistema de Propuestas Técnicas – Área Experiencia</h1>
+  <p>Flujo modular asistido por GPTs en ChatGPT y Claude (Cowork) para crear propuestas comerciales de alto impacto</p>
+</div>
+
+<div class="tabs-nav">
+  <button class="tab-btn active" onclick="switchTab('flujo')">🔄 Flujo del sistema</button>
+  <button class="tab-btn" onclick="switchTab('cliente')">📁 Flujo por cliente</button>
+  <button class="tab-btn" onclick="switchTab('drive')">☁️ Drive y archivos</button>
+  <button class="tab-btn" onclick="switchTab('onboarding')">🎓 Onboarding del equipo</button>
+</div>
+
+<!-- ══ TAB: FLUJO ══ -->
+<div class="tab-content active" id="tab-flujo">
+
+<div class="input-banner" style="margin-top:16px;">
+  <div class="input-banner-icon">📥</div>
+  <div>
+    <div class="input-banner-label">INPUT DEL PROYECTO</div>
+    <div class="input-banner-items">
+      <span>📄 Brief del cliente</span><span>🎙️ Transcripción de reunión</span><span>📋 RFP / RFQ</span><span>📝 Notas del equipo</span><span>ℹ️ Contexto comercial</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── FLOW ROW ── -->
+<div class="flow-wrap">
+<div class="flow-row">
+
+  <!-- 1 -->
+  <div class="card active-gpt" id="c1" onclick="show(1)">
+    <div class="card-body">
+      <div class="card-num" style="background:#2D287E;">1</div>
+      <div class="card-icon">🔍</div>
+      <div class="card-title-text">GPT Analizador de Brief</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-active">✓ Activo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#4B6BDD" opacity="0.75"/></svg></div>
+
+  <!-- 2 -->
+  <div class="card active-gpt" id="c2" onclick="show(2)">
+    <div class="card-body">
+      <div class="card-num" style="background:#2D287E;">2</div>
+      <div class="card-icon">♟️</div>
+      <div class="card-title-text">GPT Estratega de Propuesta</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-active">✓ Activo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#5B3BB0" opacity="0.75"/></svg></div>
+
+  <!-- 3 -->
+  <div class="card active-gpt" id="c3" onclick="show(3)">
+    <div class="card-body">
+      <div class="card-num" style="background:#2D287E;">3</div>
+      <div class="card-icon">🏗️</div>
+      <div class="card-title-text">GPT Constructor de Propuesta</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-active">✓ Activo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#7418F0" opacity="0.8"/></svg></div>
+
+  <!-- 4 -->
+  <div class="card active-gpt" id="c4" onclick="show(4)">
+    <div class="card-body">
+      <div class="card-num" style="background:#2D287E;">4</div>
+      <div class="card-icon">🎨</div>
+      <div class="card-title-text">GPT Arquitecto de Presentación</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-active">✓ Activo</span>
+    </div>
+    <div class="card-drive-tag">📋 schema_layouts_ote.json (Drive)</div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#9B18F0" opacity="0.85"/></svg></div>
+
+  <!-- 5 -->
+  <div class="card claude-card" id="c5" onclick="show(5)">
+    <div class="card-body">
+      <div class="card-num" style="background:#7418F0;">5</div>
+      <div class="card-icon">⚡</div>
+      <div class="card-title-text">Claude / Skill Generación PPT</div>
+      <div class="card-where">Cowork + Drive</div>
+      <span class="card-badge badge-claude">✓ Activo</span>
+    </div>
+    <div class="card-drive-tag v">📊 Lee template OTE desde Drive</div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#E8830A" opacity="0.8"/></svg></div>
+
+  <!-- 6 -->
+  <div class="card next-card" id="c6" onclick="show(6)">
+    <div class="card-body">
+      <div class="card-num" style="background:#E8830A;">6</div>
+      <div class="card-icon">💰</div>
+      <div class="card-title-text">GPT Pricing / Estimador</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-next">🔜 Próximo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#999" opacity="0.7"/></svg></div>
+
+  <!-- 7 -->
+  <div class="card next-card" id="c7" onclick="show(7)">
+    <div class="card-body">
+      <div class="card-num" style="background:#888;">7</div>
+      <div class="card-icon">💬</div>
+      <div class="card-title-text">GPT Storytelling / Speech</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-next">🔜 Próximo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#888" opacity="0.6"/></svg></div>
+
+  <!-- 8 -->
+  <div class="card next-card" id="c8" onclick="show(8)">
+    <div class="card-body">
+      <div class="card-num" style="background:#777;">8</div>
+      <div class="card-icon">👥</div>
+      <div class="card-title-text">GPT Comité Evaluador</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-next">🔜 Próximo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#1A8C52" opacity="0.7"/></svg></div>
+
+  <!-- 9 -->
+  <div class="card next-card" id="c9" onclick="show(9)">
+    <div class="card-body">
+      <div class="card-num" style="background:#1A8C52;">9</div>
+      <div class="card-icon">✅</div>
+      <div class="card-title-text">GPT QA Final Comercial</div>
+      <div class="card-where">ChatGPT</div>
+      <span class="card-badge badge-next">🔜 Próximo</span>
+    </div>
+  </div>
+  <div class="chev-wrap"><svg viewBox="0 0 32 22"><polygon points="0,2 22,2 32,11 22,20 0,20 10,11" fill="#1A8C52" opacity="0.9"/></svg></div>
+
+  <!-- 10 -->
+  <div class="card end-card" id="c10" onclick="show(10)">
+    <div class="card-body">
+      <div class="card-num" style="background:#1A8C52;">10</div>
+      <div class="card-icon">📦</div>
+      <div class="card-title-text">Entrega Final al Cliente</div>
+      <div class="card-where">Manual</div>
+      <span class="card-badge badge-end">OUTPUT FINAL</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- QA ROW hidden -->
+<div class="qa-row" style="display:none;">
+  <div class="qa-box active-qa" style="width:158px;flex-shrink:0;"><span class="qa-title a">QA ETAPA 1</span><div class="qa-item">¿Necesidad clara?</div><div class="qa-item">¿Objetivos definidos?</div><div class="qa-item">¿Restricciones detectadas?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box active-qa" style="width:158px;flex-shrink:0;"><span class="qa-title a">QA ETAPA 2</span><div class="qa-item">¿Tensión y oportunidad claras?</div><div class="qa-item">¿Enfoque sólido?</div><div class="qa-item">¿Insumo para constructor?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box active-qa" style="width:158px;flex-shrink:0;"><span class="qa-title a">QA ETAPA 3</span><div class="qa-item">¿Alcance claro?</div><div class="qa-item">¿Iniciativas coherentes?</div><div class="qa-item">¿Supuestos declarados?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box active-qa" style="width:158px;flex-shrink:0;"><span class="qa-title a">QA ETAPA 4</span><div class="qa-item">¿Estructura lógica?</div><div class="qa-item">¿Mensajes alineados?</div><div class="qa-item">¿Flujo de historia claro?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box violet-qa" style="width:158px;flex-shrink:0;"><span class="qa-title v">QA ETAPA 5</span><div class="qa-item">¿Deck completo?</div><div class="qa-item">¿Diseño consistente?</div><div class="qa-item">¿Textos correctos?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box inactive-qa" style="width:158px;flex-shrink:0;"><span class="qa-title i">QA ETAPA 6</span><div class="qa-item i">¿Estimación completa?</div><div class="qa-item i">¿Pricing consistente?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box inactive-qa" style="width:158px;flex-shrink:0;"><span class="qa-title i">QA ETAPA 7</span><div class="qa-item i">¿Narrativa convincente?</div><div class="qa-item i">¿Mensajes diferenciados?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box inactive-qa" style="width:158px;flex-shrink:0;"><span class="qa-title i">QA ETAPA 8</span><div class="qa-item i">¿Qué entiende el cliente?</div><div class="qa-item i">¿Qué le convence?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box inactive-qa" style="width:158px;flex-shrink:0;"><span class="qa-title i">QA ETAPA 9</span><div class="qa-item i">¿Calidad integral OK?</div><div class="qa-item i">¿Coherencia total?</div></div>
+  <div class="qa-aw"></div>
+  <div class="qa-box green-qa" style="width:158px;flex-shrink:0;"><span class="qa-title g">ENTREGA</span><div class="qa-item">PPT + Propuesta + Pricing</div><div class="qa-item">Listo para presentar</div></div>
+</div>
+
+<!-- ── DETAIL PANEL ── -->
+<div class="detail-wrap">
+  <div class="detail-panel" id="detailPanel">
+    <div class="dp-header blue" id="dpHeader">
+      <div><div class="dp-title" id="dpTitle"></div><div class="dp-sub" id="dpSub"></div></div>
+      <button class="close-btn" onclick="closeDetail()">✕ Cerrar</button>
+    </div>
+    <div class="dp-body">
+      <div class="dp-col"><h3>📥 Input — qué necesitas</h3><div id="dpInput"></div></div>
+      <div class="dp-col"><h3>⚙️ Cómo usarlo — paso a paso</h3><div id="dpHow"></div></div>
+      <div class="dp-col"><h3>📤 Output — qué obtienes</h3><div id="dpOutput"></div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-flujo -->
+
+<!-- ══ TAB: CLIENTE ══ -->
+<div class="tab-content" id="tab-cliente">
+<!-- ── FLUJO POR CLIENTE ── -->
+<div style="margin:14px 48px 0;background:white;border-radius:12px;border:1px solid #E8EBF0;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+  <h2 style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:3px;">🔄 Flujo por cliente nuevo — qué hace cada uno y dónde guarda</h2>
+  <p style="font-size:10px;color:#888;margin-bottom:16px;">Cada vez que llega un cliente nuevo, sigue estos pasos en orden. Todo queda organizado en la misma carpeta de Drive compartida.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">
+
+    <!-- Paso A -->
+    <div style="background:#EEF1FF;border-radius:10px;padding:12px;border:1px solid #C8D0F0;">
+      <div style="font-size:10px;font-weight:700;color:#2D287E;margin-bottom:6px;">① Recibir el requerimiento</div>
+      <div style="font-size:10px;color:#333;line-height:1.5;">Brief, transcripción o notas de reunión</div>
+      <div style="margin-top:8px;background:white;border-radius:6px;padding:6px 8px;font-size:9px;color:#555;">
+        <div style="font-weight:600;color:#2D287E;margin-bottom:2px;">💾 Guardar en Drive</div>
+        <code style="font-size:8.5px;">01_Briefs/<br>NombreCliente_brief</code>
+      </div>
+    </div>
+
+    <!-- Paso B -->
+    <div style="background:#EEF1FF;border-radius:10px;padding:12px;border:1px solid #C8D0F0;">
+      <div style="font-size:10px;font-weight:700;color:#2D287E;margin-bottom:6px;">② Correr los GPTs en ChatGPT</div>
+      <div style="font-size:10px;color:#333;line-height:1.5;">Pasos 1→2→3→4 del flujo. El output final es la propuesta técnica + JSON del Arquitecto.</div>
+      <div style="margin-top:8px;background:white;border-radius:6px;padding:6px 8px;font-size:9px;color:#555;">
+        <div style="font-weight:600;color:#2D287E;margin-bottom:2px;">💾 Guardar en Drive</div>
+        <code style="font-size:8.5px;">02_Propuestas_Tecnicas/<br>NombreCliente_propuesta<br><br>03_JSONs_Arquitecto/<br>NombreCliente_JSON</code>
+      </div>
+    </div>
+
+    <!-- Paso C -->
+    <div style="background:#F2E8FF;border-radius:10px;padding:12px;border:1px solid #DDD0F8;">
+      <div style="font-size:10px;font-weight:700;color:#7418F0;margin-bottom:6px;">③ Generar la PPT en Claude</div>
+      <div style="font-size:10px;color:#333;line-height:1.5;">Abre Cowork, escribe <strong>"genera la PPT con este JSON"</strong> y pega el JSON del paso anterior.</div>
+      <div style="margin-top:8px;background:white;border-radius:6px;padding:6px 8px;font-size:9px;color:#555;">
+        <div style="font-weight:600;color:#7418F0;margin-bottom:2px;">💾 Claude guarda automático</div>
+        <code style="font-size:8.5px;">04_PPTs_Generadas/<br>NombreCliente.pptx</code>
+      </div>
+    </div>
+
+    <!-- Paso D -->
+    <div style="background:#EEF1FF;border-radius:10px;padding:12px;border:1px solid #C8D0F0;">
+      <div style="font-size:10px;font-weight:700;color:#2D287E;margin-bottom:6px;">④ Completar en ChatGPT</div>
+      <div style="font-size:10px;color:#333;line-height:1.5;">Pasos 6→7→8→9 del flujo. Pricing, Storytelling, Comité y QA Final.</div>
+      <div style="margin-top:8px;background:white;border-radius:6px;padding:6px 8px;font-size:9px;color:#555;">
+        <div style="font-weight:600;color:#2D287E;margin-bottom:2px;">💾 Guardar en Drive</div>
+        <code style="font-size:8.5px;">05_Clientes/<br>NombreCliente/<br>→ todos los archivos</code>
+      </div>
+    </div>
+
+    <!-- Paso E -->
+    <div style="background:#EDFBF4;border-radius:10px;padding:12px;border:1px solid #B8E8CE;">
+      <div style="font-size:10px;font-weight:700;color:#1A8C52;margin-bottom:6px;">⑤ Entregar al cliente</div>
+      <div style="font-size:10px;color:#333;line-height:1.5;">Abrir la PPT en Google Slides, revisar y ajustar. Coordinar envío o reunión de presentación.</div>
+      <div style="margin-top:8px;background:white;border-radius:6px;padding:6px 8px;font-size:9px;color:#555;">
+        <div style="font-weight:600;color:#1A8C52;margin-bottom:2px;">📦 Paquete final</div>
+        <code style="font-size:8.5px;">PPT + Propuesta técnica<br>+ Pricing + Docs</code>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Carpeta del cliente -->
+  <div style="background:#F7F8FA;border-radius:8px;padding:12px 16px;display:flex;align-items:flex-start;gap:16px;">
+    <div style="font-size:11px;font-weight:700;color:#12122A;white-space:nowrap;">📁 Carpeta del cliente en Drive:</div>
+    <div style="font-size:10px;color:#555;line-height:1.8;font-family:monospace;">
+      05_Clientes / <strong>NombreCliente</strong> /
+      &nbsp;&nbsp;→ brief original &nbsp;·&nbsp; propuesta técnica &nbsp;·&nbsp; JSON del Arquitecto &nbsp;·&nbsp; PPT final &nbsp;·&nbsp; versiones anteriores
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-cliente -->
+
+<!-- ══ TAB: DRIVE ══ -->
+<div class="tab-content" id="tab-drive">
+<!-- ── DRIVE ── -->
+<div class="drive-section">
+  <h2>☁️ Google Drive — Dónde vive todo y cómo se conecta</h2>
+  <p style="margin-bottom:20px;">Drive es el centro del sistema. Todo lo que produces en ChatGPT y todo lo que genera Claude queda guardado aquí, ordenado y accesible para todo el equipo.</p>
+
+  <!-- Folder tree visual -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+
+    <!-- Tree -->
+    <div style="background:#F7F8FA;border-radius:10px;padding:16px 20px;border:1px solid #E8EBF0;">
+      <div style="font-size:11px;font-weight:700;color:#12122A;margin-bottom:12px;">📂 Estructura de carpetas</div>
+      <div style="font-family:monospace;font-size:11px;line-height:2;color:#333;">
+        <div style="color:#2D287E;font-weight:700;">📁 Sistema OTEs KI/</div>
+        <div style="padding-left:20px;">├── 📁 <strong>00_Sistema</strong></div>
+        <div style="padding-left:36px;color:#888;font-size:10px;">plugin · template · schema · guía</div>
+        <div style="padding-left:20px;">├── 📁 <strong>01_Briefs</strong></div>
+        <div style="padding-left:36px;color:#888;font-size:10px;">briefs de cada cliente</div>
+        <div style="padding-left:20px;">├── 📁 <strong>02_Propuestas_Tecnicas</strong></div>
+        <div style="padding-left:36px;color:#888;font-size:10px;">outputs del Constructor (GPT 3)</div>
+        <div style="padding-left:20px;">├── 📁 <strong>03_JSONs_Arquitecto</strong></div>
+        <div style="padding-left:36px;color:#888;font-size:10px;">JSONs del Arquitecto (GPT 4)</div>
+        <div style="padding-left:20px;">├── 📁 <strong>04_PPTs_Generadas</strong></div>
+        <div style="padding-left:36px;color:#888;font-size:10px;">PPTs que genera Claude</div>
+        <div style="padding-left:20px;">└── 📁 <strong>05_Clientes</strong></div>
+        <div style="padding-left:36px;">├── 📁 Enaex</div>
+        <div style="padding-left:36px;">├── 📁 Factotal</div>
+        <div style="padding-left:36px;">└── 📁 NuevoCliente…</div>
+      </div>
+    </div>
+
+    <!-- Connection explanation -->
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="font-size:11px;font-weight:700;color:#12122A;margin-bottom:2px;">🔗 Cómo se conecta con ChatGPT y Claude</div>
+
+      <div style="background:#EEF1FF;border-radius:8px;padding:12px 14px;border-left:3px solid #2D287E;">
+        <div style="font-size:10px;font-weight:700;color:#2D287E;margin-bottom:4px;">ChatGPT → Drive</div>
+        <div style="font-size:10px;color:#444;line-height:1.6;">Tú copias manualmente los outputs de los GPTs y los guardas en las carpetas correspondientes. El brief va a <strong>01_Briefs</strong>, la propuesta técnica a <strong>02_Propuestas_Tecnicas</strong>, el JSON a <strong>03_JSONs_Arquitecto</strong>.</div>
+      </div>
+
+      <div style="background:#F2E8FF;border-radius:8px;padding:12px 14px;border-left:3px solid #7418F0;">
+        <div style="font-size:10px;font-weight:700;color:#7418F0;margin-bottom:4px;">Claude ↔ Drive (automático)</div>
+        <div style="font-size:10px;color:#444;line-height:1.6;">Claude está conectado a Drive. Cuando generas una PPT, <strong>lee automáticamente</strong> el template desde <strong>00_Sistema</strong> y <strong>guarda automáticamente</strong> la PPT en <strong>04_PPTs_Generadas</strong>. No tienes que hacer nada.</div>
+      </div>
+
+      <div style="background:#EDFBF4;border-radius:8px;padding:12px 14px;border-left:3px solid #1A8C52;">
+        <div style="font-size:10px;font-weight:700;color:#1A8C52;margin-bottom:4px;">05_Clientes → todo junto</div>
+        <div style="font-size:10px;color:#444;line-height:1.6;">Cuando terminas una propuesta, mueves todos los archivos a la carpeta del cliente en <strong>05_Clientes</strong>. Así queda todo en un solo lugar: brief, propuesta, JSON y PPT final.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files in 00_Sistema -->
+  <div style="background:#EEF1FF;border:1.5px solid #C8D0F0;border-radius:10px;padding:14px 18px;">
+    <div style="font-size:11px;font-weight:700;color:#2D287E;margin-bottom:10px;">📁 Qué hay en 00_Sistema — los archivos del sistema que no debes mover ni editar</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div style="background:white;border-radius:7px;padding:9px 11px;border:1px solid #DDE4FF;">
+        <div style="font-size:16px;margin-bottom:3px;">📊</div>
+        <div style="font-size:9.5px;font-weight:700;color:#2D287E;">Template OTE Claude.pptx</div>
+        <div style="font-size:9px;color:#666;margin-top:2px;line-height:1.4;">El diseño base de todas las propuestas. Claude lo usa automáticamente.</div>
+      </div>
+      <div style="background:white;border-radius:7px;padding:9px 11px;border:1px solid #DDE4FF;">
+        <div style="font-size:16px;margin-bottom:3px;">📋</div>
+        <div style="font-size:9.5px;font-weight:700;color:#2D287E;">schema_layouts_ote.json</div>
+        <div style="font-size:9px;color:#666;margin-top:2px;line-height:1.4;">Le dice al GPT Arquitecto cómo estructurar el JSON de salida.</div>
+      </div>
+      <div style="background:white;border-radius:7px;padding:9px 11px;border:1px solid #DDE4FF;">
+        <div style="font-size:16px;margin-bottom:3px;">🔌</div>
+        <div style="font-size:9.5px;font-weight:700;color:#2D287E;">sistema-otes-ki.plugin</div>
+        <div style="font-size:9px;color:#666;margin-top:2px;line-height:1.4;">Se instala una vez en Claude Cowork. Da la capacidad de generar PPTs.</div>
+      </div>
+      <div style="background:white;border-radius:7px;padding:9px 11px;border:1px solid #DDE4FF;">
+        <div style="font-size:16px;margin-bottom:3px;">🌐</div>
+        <div style="font-size:9.5px;font-weight:700;color:#2D287E;">Sistema_OTEs_Guia.html</div>
+        <div style="font-size:9px;color:#666;margin-top:2px;line-height:1.4;">Esta guía. Ábrela en el navegador para consultar el flujo en cualquier momento.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-drive -->
+
+<!-- ══ TAB: ONBOARDING ══ -->
+<div class="tab-content" id="tab-onboarding">
+<!-- ── ONBOARDING ── -->
+<div style="margin:14px 48px 0;background:white;border-radius:12px;border:1px solid #E8EBF0;padding:24px 28px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+  <h2 style="font-size:14px;font-weight:700;color:#12122A;margin-bottom:4px;">🎓 Paso a paso para empezar a usar el sistema</h2>
+  <p style="font-size:11px;color:#888;margin-bottom:24px;">Sigue este orden la primera vez que uses el sistema. Cada paso es independiente — si ya hiciste alguno, sáltalo.</p>
+
+  <div style="display:flex;flex-direction:column;gap:0;">
+
+    <!-- 1 -->
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#2D287E;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+        <div style="width:2px;flex:1;background:#EAEEF2;margin:4px 0;"></div>
+      </div>
+      <div style="flex:1;padding:0 0 24px 16px;">
+        <div style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:6px;">Solicitar acceso a la carpeta de Drive</div>
+        <p style="font-size:11px;color:#555;line-height:1.7;margin-bottom:8px;">Toda la información del sistema vive en una carpeta compartida de Google Drive. Antes de hacer cualquier cosa, asegúrate de tener acceso.</p>
+        <div style="background:#EEF1FF;border-radius:8px;padding:10px 14px;font-size:11px;color:#2D287E;"><strong>Qué hacer:</strong> Pídele a quien administra el sistema que te comparta la carpeta. Verifica que puedes abrirla desde tu Google Drive.</div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#2D287E;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+        <div style="width:2px;flex:1;background:#EAEEF2;margin:4px 0;"></div>
+      </div>
+      <div style="flex:1;padding:0 0 24px 16px;">
+        <div style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:6px;">Instalar el plugin en Claude Cowork</div>
+        <p style="font-size:11px;color:#555;line-height:1.7;margin-bottom:8px;">El plugin es lo que le da a Claude la capacidad de generar propuestas. Sin él, Claude no sabe qué hacer con el JSON.</p>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 14px;font-size:11px;color:#333;line-height:1.8;">
+          1. Abre la carpeta de Drive → entra a <strong>00_Sistema</strong><br>
+          2. Descarga el archivo <strong>sistema-otes-ki.plugin</strong><br>
+          3. Abre Claude Cowork → Configuración → Plugins<br>
+          4. Arrastra el archivo descargado a esa pantalla<br>
+          5. Confirma que aparece <strong>generar-ote</strong> en tu lista de skills
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#7418F0;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+        <div style="width:2px;flex:1;background:#EAEEF2;margin:4px 0;"></div>
+      </div>
+      <div style="flex:1;padding:0 0 24px 16px;">
+        <div style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:6px;">Conectar Google Drive en Claude Cowork</div>
+        <p style="font-size:11px;color:#555;line-height:1.7;margin-bottom:8px;">Esta conexión permite que Claude lea el template OTE y guarde las PPTs generadas directamente en Drive, sin que tengas que hacer nada manual.</p>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 14px;font-size:11px;color:#333;line-height:1.8;">
+          1. En Claude Cowork → Configuración → Conectores<br>
+          2. Busca <strong>Google Drive</strong> y haz clic en Conectar<br>
+          3. Autoriza con tu cuenta de Google del equipo<br>
+          4. Verifica que aparece como <strong>Conectado</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#2D287E;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+        <div style="width:2px;flex:1;background:#EAEEF2;margin:4px 0;"></div>
+      </div>
+      <div style="flex:1;padding:0 0 24px 16px;">
+        <div style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:6px;">Acceder al GPT Arquitecto en ChatGPT</div>
+        <p style="font-size:11px;color:#555;line-height:1.7;margin-bottom:8px;">El GPT Arquitecto es el que transforma la propuesta técnica en el JSON que necesita Claude. Es el puente entre ChatGPT y Claude.</p>
+        <div style="background:#F7F8FA;border-radius:8px;padding:10px 14px;font-size:11px;color:#333;line-height:1.8;">
+          1. Abre ChatGPT → busca el GPT <strong>Arquitecto de Presentación</strong> en tus GPTs de equipo<br>
+          2. Verifica que tiene el archivo <strong>schema_layouts_ote.json</strong> adjunto (aparece en la descripción del GPT)<br>
+          3. Si no lo encuentras, pídele al administrador que te dé acceso
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div style="display:flex;gap:0;align-items:stretch;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:48px;flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#1A8C52;color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+      </div>
+      <div style="flex:1;padding:0 0 0 16px;">
+        <div style="font-size:13px;font-weight:700;color:#12122A;margin-bottom:6px;">Hacer una propuesta de práctica</div>
+        <p style="font-size:11px;color:#555;line-height:1.7;margin-bottom:8px;">Antes de usar el sistema con un cliente real, pruébalo una vez con un brief ficticio. El objetivo es perder el miedo y entender cómo fluye la información.</p>
+        <div style="background:#EDFBF4;border-radius:8px;padding:10px 14px;font-size:11px;color:#1A8C52;line-height:1.8;">
+          <strong>Ejercicio sugerido:</strong> Toma un brief de un proyecto anterior (o inventa uno simple), corre los 4 GPTs en ChatGPT, copia el JSON del Arquitecto, pégalo en Claude con el mensaje <em>"genera la PPT con este JSON"</em> y revisa el resultado.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /tab-onboarding -->
+
+<!-- ── ORCH ── -->
+<div class="orch">
+  <h2>🤖 Agente Orquestador <span class="badge-soon">🔜 En construcción</span></h2>
+  <p class="orch-sub">Coordinará el flujo completo automáticamente — activará cada GPT/Claude en orden, validará el QA de cada etapa y entregará el paquete final sin intervención manual</p>
+  <div class="orch-grid">
+    <div class="orch-col">
+      <h4>Qué hará</h4>
+      <div class="orch-item"><div class="orch-dot"></div>Recibir el brief y definir objetivo</div>
+      <div class="orch-item"><div class="orch-dot"></div>Activar cada GPT/Claude en orden correcto</div>
+      <div class="orch-item"><div class="orch-dot"></div>Validar QA por etapa (máx. 2 reintentos)</div>
+      <div class="orch-item"><div class="orch-dot"></div>Consolidar y entregar paquete final</div>
+    </div>
+    <div class="orch-col">
+      <h4>Flujo automatizado</h4>
+      <div class="orch-flow">
+        <div class="orch-step">Brief</div><div class="orch-arr">→</div>
+        <div class="orch-step">Analizador</div><div class="orch-arr">→</div>
+        <div class="orch-step">Estratega</div><div class="orch-arr">→</div>
+        <div class="orch-step">Constructor</div><div class="orch-arr">→</div>
+        <div class="orch-step">Arquitecto</div><div class="orch-arr">→</div>
+        <div class="orch-step">⚡ Claude PPT</div><div class="orch-arr">→</div>
+        <div class="orch-step">Pricing</div><div class="orch-arr">→</div>
+        <div class="orch-step">Storytelling</div><div class="orch-arr">→</div>
+        <div class="orch-step">QA Final</div><div class="orch-arr">→</div>
+        <div class="orch-step">📦 Entrega</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const D={1:{title:"GPT Analizador de Brief",sub:"Etapa 1 · ChatGPT · Activo",col:"blue",input:[{t:"<strong>Brief del cliente</strong> — documento, texto o PDF"},{t:"<strong>Transcripción de reunión</strong> — notas o audio transcrito"},{t:"<strong>RFP / RFQ</strong> — si existe licitación formal"},{t:"<strong>Contexto comercial</strong> — industria, relación previa"}],how:[{s:"Abre el GPT Analizador de Brief en ChatGPT"},{s:"Pega el brief, transcripción o notas (puede ser todo junto)"},{s:"El GPT identifica las 7 dimensiones del análisis automáticamente"},{s:"Revisa: ¿Necesidad clara? ¿Objetivos? ¿Restricciones?"},{s:"Si hay info faltante, te indicará qué preguntar al cliente"}],output:[{t:"<strong>Necesidades</strong> explícitas e implícitas"},{t:"<strong>Dolores identificados</strong> por área"},{t:"<strong>Stakeholders mapeados</strong> con rol e interés"},{t:"<strong>Restricciones</strong> detectadas"},{t:"<strong>Información faltante</strong> — preguntas para el cliente"}]},
+2:{title:"GPT Estratega de Propuesta",sub:"Etapa 2 · ChatGPT · Activo",col:"blue",input:[{t:"<strong>Output completo del Analizador</strong> (paso 1)"}],how:[{s:"Pega el análisis completo del paso 1"},{s:"El GPT construye la lectura estratégica: tensión, oportunidad y enfoque"},{s:"Valida: ¿Tensión clara? ¿Enfoque diferenciador?"}],output:[{t:"<strong>Tensión estratégica</strong> — conflicto central del cliente"},{t:"<strong>Oportunidad identificada</strong>"},{t:"<strong>Enfoque recomendado</strong> y diferenciación"}]},
+3:{title:"GPT Constructor de Propuesta",sub:"Etapa 3 · ChatGPT · Activo",col:"blue",input:[{t:"<strong>Análisis</strong> (paso 1) + <strong>Estrategia</strong> (paso 2) — ambos completos"}],how:[{s:"Pega los outputs de pasos 1 y 2 juntos"},{s:"El GPT construye la propuesta técnica robusta"},{s:"Valida alcance, iniciativas, entregables y riesgos"}],output:[{t:"<strong>Alcance detallado</strong> del proyecto"},{t:"<strong>Metodología y fases</strong>"},{t:"<strong>Equipo, supuestos y riesgos</strong>"}]},
+4:{title:"GPT Arquitecto de Presentación",sub:"Etapa 4 · ChatGPT · Activo · usa schema_layouts_ote.json (Drive)",col:"blue",input:[{t:"<strong>Propuesta técnica completa</strong> (paso 3)"},{t:"<strong>schema_layouts_ote.json</strong> — adjunto en el GPT (desde Drive)"},{t:"<strong>Ejemplo de OTE</strong> — adjunto en el GPT"}],how:[{s:"Pega la propuesta técnica completa"},{s:"El GPT entrega DOS secciones"},{s:"<strong>Sección 1:</strong> estructura editorial por slide — revisa y ajusta"},{s:"<strong>Sección 2:</strong> JSON para Claude — copia SOLO este bloque para el paso 5"}],output:[{t:"<strong>Sección 1:</strong> estructura editorial con títulos, bajadas y diagramas"},{t:"<strong>Sección 2:</strong> JSON con layouts y contenido — para pegar en Claude"}]},
+5:{title:"Claude / Skill Generación PPT",sub:"Etapa 5 · Claude Cowork + Google Drive · Activo",col:"violet",
+input:[{t:"<strong>JSON (Sección 2)</strong> del GPT Arquitecto — copiado desde ChatGPT"},{t:"<strong>Template OTE Claude.pptx</strong> en Drive — Claude lo descarga automáticamente"}],
+how:[
+  {s:'<span style=\"display:inline-block;background:#FFF0E0;border:1px solid #E8830A;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:#E8830A;margin-bottom:4px;\">⚙️ SOLO LA PRIMERA VEZ</span>',v:true},
+  {s:'Descarga el archivo <strong>sistema-otes-ki.plugin</strong> desde la carpeta de Drive',v:true},
+  {s:'Arrástralo a Claude Cowork o ve a Configuración → Plugins → Instalar',v:true},
+  {s:'Conecta Google Drive en Cowork: Configuración → Conectores → Google Drive',v:true},
+  {s:'<span style=\"display:inline-block;background:#F0E8FF;border:1px solid #7418F0;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700;color:#7418F0;margin:6px 0 4px;\">▶ CADA VEZ QUE USAS</span>',v:true},
+  {s:'Abre Claude Cowork — cualquier conversación nueva',v:true},
+  {s:'Escribe: <strong>"genera la PPT con este JSON"</strong>',v:true},
+  {s:'Pega el JSON (Sección 2 del Arquitecto) debajo del mensaje',v:true},
+  {s:'Claude descarga el master de Drive, genera la PPT y la guarda automáticamente',v:true}
+],
+output:[{t:"<strong>.pptx editable</strong> con template OTE oficial",v:true},{t:"<strong>Todos los slides</strong> del JSON con contenido real",v:true},{t:"<strong>Plazos y Precios</strong> + <strong>Slide de Cierre</strong> — siempre al final",v:true},{t:"<strong>Guardado en Drive</strong> → 05_Output_propuestas/",v:true}]},
+6:{title:"GPT Pricing / Estimador",sub:"Etapa 6 · ChatGPT · En construcción",col:"orange",input:[{t:"<strong>Propuesta técnica</strong> (paso 3)"},{t:"<strong>PPT generada</strong> (paso 5)"}],how:[{s:"Pegar propuesta y PPT generada"},{s:"El GPT estima esfuerzo por rol y fase"},{s:"Genera tabla de inversión editable"}],output:[{t:"<strong>Estimación de esfuerzo</strong> por rol y fase"},{t:"<strong>Tabla de inversión</strong> editable"}]},
+7:{title:"GPT Storytelling / Speech",sub:"Etapa 7 · ChatGPT · En construcción",col:"gray",input:[{t:"<strong>PPT generada</strong> (paso 5)"},{t:"<strong>Audiencia</strong> de la reunión"}],how:[{s:"Pegar PPT y describir la audiencia"},{s:"El GPT genera narrativa slide a slide"}],output:[{t:"<strong>Narrativa por slide</strong> — qué decir"},{t:"<strong>Mensajes clave</strong> por audiencia"}]},
+8:{title:"GPT Comité Evaluador",sub:"Etapa 8 · ChatGPT · En construcción",col:"gray",input:[{t:"<strong>Paquete completo</strong> — propuesta + PPT + pricing"}],how:[{s:"Pegar paquete completo"},{s:"El GPT simula la mirada de: Sponsor, Negocio, TI, Operación"},{s:"Identifica objeciones y riesgos percibidos"}],output:[{t:"<strong>Análisis por rol</strong> del evaluador"},{t:"<strong>Objeciones anticipadas</strong>"},{t:"<strong>Ajustes recomendados</strong>"}]},
+9:{title:"GPT QA Final Comercial",sub:"Etapa 9 · ChatGPT · En construcción",col:"green",input:[{t:"<strong>Paquete completo</strong> + feedback del comité (paso 8)"}],how:[{s:"Pegar todo el material con el feedback"},{s:"El GPT verifica coherencia: brief → estrategia → propuesta → PPT"},{s:"Entrega checklist de aprobación"}],output:[{t:"<strong>Checklist de calidad</strong> aprobado"},{t:"<strong>Paquete aprobado</strong> listo para entrega"}]},
+10:{title:"Entrega Final al Cliente",sub:"Etapa 10 · Manual",col:"green",input:[{t:"<strong>PPT OTE editable</strong> validada"},{t:"<strong>Propuesta técnica</strong> en Word/PDF"},{t:"<strong>Tabla de inversión</strong>"}],how:[{s:"Revisar paquete completo"},{s:"Abrir .pptx en Google Slides para ajustes finales"},{s:"Enviar o presentar al cliente"}],output:[{t:"<strong>Paquete comercial completo</strong>"},{t:"<strong>PPT OTE</strong> con template oficial KI"},{t:"<strong>Propuesta lista</strong> para tomadores de decisión"}]}};
+
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name)?.classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function show(n){const d=D[n];if(!d)return;
+document.getElementById('dpTitle').textContent=d.title;
+document.getElementById('dpSub').textContent=d.sub;
+document.getElementById('dpHeader').className='dp-header '+(d.col||'blue');
+const dc=d.col==='violet'?'v':d.col==='orange'?'o':d.col==='green'?'g':'';
+document.getElementById('dpInput').innerHTML=d.input.map(i=>`<div class="dp-item"><div class="dp-dot ${dc}"></div><div class="dp-text">${i.t}</div></div>`).join('');
+document.getElementById('dpHow').innerHTML='<div class="how-box">'+d.how.map((h,i)=>`<div class="how-step"><div class="how-n ${d.col==='violet'?'v':''}">${i+1}</div><div>${h.s}</div></div>`).join('')+'</div>';
+document.getElementById('dpOutput').innerHTML=d.output.map(o=>`<div class="dp-item"><div class="dp-dot ${dc}"></div><div class="dp-text">${o.t}</div></div>`).join('');
+const p=document.getElementById('detailPanel');p.className='detail-panel visible';
+document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+document.getElementById('c'+n)?.classList.add('selected');
+setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'nearest'}),50);}
+function closeDetail(){document.getElementById('detailPanel').className='detail-panel';document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));}
+</script>
+</body>
+</html>
